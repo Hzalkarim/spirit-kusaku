@@ -12,16 +12,11 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
 import org.tensorflow.lite.DataType
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.support.common.FileUtil
-import org.tensorflow.lite.support.common.TensorProcessor
-import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
-import org.tensorflow.lite.support.label.TensorLabel
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import spirit.bangkit.kusaku.databinding.ActivityMainBinding
+import spirit.bangkit.kusaku.tensorflow.TensorFlowModel
 import java.io.IOException
 
 
@@ -43,37 +38,16 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-        val probabilityBuffer = TensorBuffer.createFixedSize(intArrayOf(1, 7), DataType.FLOAT32)
-
-        var tflite : Interpreter? = null
-        try{
-            val tfliteModel
-            = FileUtil.loadMappedFile(this,
-                "face_model_two.tflite");
-            tflite = Interpreter(tfliteModel)
-        } catch (e : IOException){
-            Log.e("tfliteSupport", "Error reading model", e);
-        }
+        val tensor = TensorFlowModel(this)
 
         val tImage = loadImage(R.drawable.tiga)
-        tflite?.run(tImage.buffer, probabilityBuffer.buffer)
+        val labels = tensor.processImageToLabel(tImage)
 
-        val axisLabels = try {
-            FileUtil.loadLabels(this, "face_label.txt")
-        } catch (e: IOException) {
-            null
-        }
+        val floatMap = labels?.mapWithFloatValue
+        Log.d("Hasil", floatMap.toString())
 
-        val probProcessor = TensorProcessor.Builder().add(NormalizeOp(0f, 7f)).build()
-        if (!axisLabels.isNullOrEmpty()) {
-            val labels = TensorLabel(axisLabels, probProcessor.process(probabilityBuffer))
 
-            val floatMap = labels.mapWithFloatValue
-            Log.d("Hasil", floatMap.toString())
-        }
-
-        Log.d("TFLite Result", probabilityBuffer.floatArray.toString())
+        Log.d("TFLite Result", tensor.probabilityBuffer.floatArray.toString())
     }
 
     private fun loadImage(id: Int): TensorImage {
