@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Kusaku</string>
+    <string name="detect_face">Detect Face</string>
+    <string name="crop">Crop</string>
 </resources>

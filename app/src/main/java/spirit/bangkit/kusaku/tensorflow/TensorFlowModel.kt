@@ -1,18 +1,22 @@
 package spirit.bangkit.kusaku.tensorflow
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.common.TensorProcessor
 import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.label.TensorLabel
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import java.io.IOException
 
-class TensorFlowModel (context: Context) {
+class TensorFlowModel (private val context: Context) {
 
     private val _probabilityBuffer : TensorBuffer =
         TensorBuffer.createFixedSize(intArrayOf(1, 7), DataType.FLOAT32)
@@ -47,6 +51,17 @@ class TensorFlowModel (context: Context) {
         } else {
             null
         }
+    }
+
+    fun loadImage(bitmap: Bitmap): TensorImage {
+        val imageProcessor = ImageProcessor.Builder()
+            .add(ResizeOp(48, 48, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
+            .build()
+        var tImage = TensorImage(DataType.FLOAT32)
+
+        tImage.load(bitmap)
+        tImage = imageProcessor.process(tImage)
+        return tImage
     }
 
 }
