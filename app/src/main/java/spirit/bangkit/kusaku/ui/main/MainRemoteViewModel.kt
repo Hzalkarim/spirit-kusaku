@@ -43,6 +43,11 @@ class MainRemoteViewModel(
     private val bitmapArray = ArrayList<Bitmap>()
     private val stringArray = ArrayList<String>()
 
+    override fun onCleared() {
+        super.onCleared()
+        clear()
+    }
+
     fun startProcessingVideo() { extractFrameFromVideo() }
 
     fun getResultFromRemoteModel() {

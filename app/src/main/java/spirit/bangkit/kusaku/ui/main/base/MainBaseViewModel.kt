@@ -49,4 +49,8 @@ open class MainBaseViewModel(application: Application, registry: ActivityResultR
     fun getVideo() {
         getVideo.launch("video/*")
     }
+
+    fun clear() {
+        mmr.close()
+    }
 }

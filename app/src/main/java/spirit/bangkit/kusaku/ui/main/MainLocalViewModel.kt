@@ -139,6 +139,7 @@ class MainLocalViewModel(
         super.onCleared()
         detector.close()
         repository.onClear()
+        clear()
     }
 
 }
