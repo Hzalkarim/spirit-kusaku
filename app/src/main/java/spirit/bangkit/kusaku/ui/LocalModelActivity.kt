@@ -32,12 +32,14 @@ class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
 
         setupLocalViewModel()
 
-        binding.btnStart.isEnabled = false
-        binding.progressBar.visibility = View.INVISIBLE
-        binding.groupMetadata.visibility = View.GONE
+        with (binding.baseLocal) {
+            btnStart.isEnabled = false
+            progressBar.visibility = View.INVISIBLE
+            groupMetadata.visibility = View.GONE
 
-        binding.btnVideo.setOnClickListener(this)
-        binding.btnStart.setOnClickListener(this)
+            btnVideo.setOnClickListener(this@LocalModelActivity)
+            btnStart.setOnClickListener(this@LocalModelActivity)
+        }
     }
 
     private fun setupLocalViewModel() {
@@ -45,31 +47,31 @@ class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
         model = ViewModelProvider(this, factory)[MainLocalViewModel::class.java]
 
         model.loading.observe(this) {
-            binding.tvStatusNum.text = it.toString()
+            binding.baseLocal.tvStatusNum.text = it.toString()
         }
 
         model.workingOn.observe(this) {
             when (it) {
                 MainLocalViewModel.EXTRACT_FRAME -> {
-                    binding.tvStatusWorking.text = getString(R.string.working_frame)
+                    binding.baseLocal.tvStatusWorking.text = getString(R.string.working_frame)
                 }
                 MainLocalViewModel.DETECT_LABEL_FACE -> {
-                    binding.tvStatusWorking.text = getString(R.string.working_label)
+                    binding.baseLocal.tvStatusWorking.text = getString(R.string.working_label)
                 }
                 MainLocalViewModel.IDLE -> {
-                    binding.groupMetadata.visibility = View.GONE
+                    binding.baseLocal.groupMetadata.visibility = View.GONE
                 }
             }
         }
 
         model.ready.observe(this) {
-            binding.btnStart.isEnabled = it == "READY"
+            binding.baseLocal.btnStart.isEnabled = it == "READY"
         }
 
         model.imageIcon.observe(this, { img ->
             Glide.with(this)
                 .load(img)
-                .into(binding.imgVideo)
+                .into(binding.baseLocal.imgVideo)
         })
     }
 
@@ -82,7 +84,7 @@ class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
             R.id.btn_start -> {
                 model.startProcessingVideo()
                 v.isEnabled = false
-                binding.groupMetadata.visibility = View.VISIBLE
+                binding.baseLocal.groupMetadata.visibility = View.VISIBLE
             }
             /*
             R.id.btn_select_video -> {
