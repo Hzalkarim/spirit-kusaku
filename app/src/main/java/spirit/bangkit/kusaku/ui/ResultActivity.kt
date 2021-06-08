@@ -3,11 +3,9 @@ package spirit.bangkit.kusaku.ui
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import spirit.bangkit.kusaku.adapter.ResultAdapter
 import spirit.bangkit.kusaku.databinding.ActivityResultBinding
-import spirit.bangkit.kusaku.factory.KusakuViewModelFactory
 
 class ResultActivity : AppCompatActivity() {
 
@@ -19,7 +17,7 @@ class ResultActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val mapResult = mutableMapOf<String?, Int>()
-        for (label in MainActivity.LABEL) {
+        for (label in LocalModelActivity.LABEL) {
             if (intent.hasExtra(label)) {
                 mapResult[label] = intent.getIntExtra(label, 0)
             }

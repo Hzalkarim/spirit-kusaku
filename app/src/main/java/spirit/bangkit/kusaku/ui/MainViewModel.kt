@@ -37,6 +37,9 @@ class MainViewModel(application: Application, mlmodel: MlModel, registry: Activi
     private val _ready = MutableLiveData<String>()
     val ready : LiveData<String> get() = _ready
 
+    private val _imageIcon = MutableLiveData<Bitmap>()
+    val imageIcon : LiveData<Bitmap> = _imageIcon
+
     private val detector = FaceDetection.getClient()
 
     private val faceExpressions = ArrayList<String?>()
@@ -48,6 +51,7 @@ class MainViewModel(application: Application, mlmodel: MlModel, registry: Activi
         try {
             mmr.setDataSource(application.applicationContext, uri)
             _ready.postValue(READY_EXTRACT)
+            _imageIcon.value = mmr.getFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST)
         } catch (e: Exception) {
             Log.d("Gagal", "Tidak Berhasil")
             _ready.postValue(FAILED)
@@ -117,8 +121,6 @@ class MainViewModel(application: Application, mlmodel: MlModel, registry: Activi
                 if (y + height() > height()) height() else y, width(), height())
         }
     }
-
-
 
     override fun onCleared() {
         super.onCleared()

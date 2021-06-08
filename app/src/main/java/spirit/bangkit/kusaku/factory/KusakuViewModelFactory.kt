@@ -2,17 +2,25 @@ package spirit.bangkit.kusaku.factory
 
 import android.app.Application
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import spirit.bangkit.kusaku.data.KusakuLocalRepository
+import spirit.bangkit.kusaku.data.KusakuRemoteRepository
+import spirit.bangkit.kusaku.data.source.remote.ApiConfig
 import spirit.bangkit.kusaku.machinelearning.MlModel
+import spirit.bangkit.kusaku.ui.MainLocalViewModel
+import spirit.bangkit.kusaku.ui.MainRemoteViewModel
 import spirit.bangkit.kusaku.ui.MainViewModel
 import spirit.bangkit.kusaku.utils.Injection
 
 class KusakuViewModelFactory private constructor(
     private val application: Application,
     private val model: MlModel,
-    private val registry: ActivityResultRegistry): ViewModelProvider.Factory {
+    private val registry: ActivityResultRegistry,
+    private val localRepository: KusakuLocalRepository? = null,
+    private val remoteRepository: KusakuRemoteRepository): ViewModelProvider.Factory {
 
     companion object {
 
@@ -21,8 +29,14 @@ class KusakuViewModelFactory private constructor(
 
         fun getInstance(application: Application, registry: ActivityResultRegistry) : KusakuViewModelFactory =
             instance ?: synchronized(this) {
-                instance ?: KusakuViewModelFactory(application, Injection.provideFaceOnExamModel(application.applicationContext), registry).apply {
-                    instance = this
+                instance ?:
+                    KusakuViewModelFactory(application,
+                        Injection.provideFaceOnExamModel(application.applicationContext),
+                        registry,
+                        Injection.provideLocalRepository(application.applicationContext),
+                        Injection.provideRemoteRepository(ApiConfig.getApiService())
+                    ).apply {
+                            instance = this
                 }
             }
     }
@@ -32,6 +46,10 @@ class KusakuViewModelFactory private constructor(
         when {
             modelClass.isAssignableFrom(MainViewModel::class.java) ->
                 return MainViewModel(application, model, registry) as T
+            modelClass.isAssignableFrom(MainLocalViewModel::class.java) ->
+                return MainLocalViewModel(application, localRepository!!, registry) as T
+            modelClass.isAssignableFrom(MainRemoteViewModel::class.java) ->
+                return MainRemoteViewModel(remoteRepository) as T
             else -> throw Throwable("Unknown ViewModel class: " + modelClass.name)
         }
     }
