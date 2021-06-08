@@ -1,4 +1,4 @@
-package spirit.bangkit.kusaku.ui
+package spirit.bangkit.kusaku.ui.main
 
 import android.os.Bundle
 import android.view.View

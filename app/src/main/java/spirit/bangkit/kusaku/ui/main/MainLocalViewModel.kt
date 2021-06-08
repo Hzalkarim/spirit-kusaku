@@ -1,4 +1,4 @@
-package spirit.bangkit.kusaku.ui
+package spirit.bangkit.kusaku.ui.main
 
 import android.app.Application
 import android.graphics.Bitmap
@@ -17,39 +17,14 @@ import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import spirit.bangkit.kusaku.data.KusakuLocalRepository
+import spirit.bangkit.kusaku.ui.main.base.MainBaseViewModel
 import java.lang.Exception
 
 class MainLocalViewModel(
     application: Application,
     private val repository: KusakuLocalRepository,
-    registry: ActivityResultRegistry) : AndroidViewModel(application) {
+    registry: ActivityResultRegistry) : MainBaseViewModel(application, registry) {
 
-    companion object {
-        const val EXTRACT_FRAME = "extract_frame"
-        const val DETECT_LABEL_FACE = "detect_label_face"
-        const val IDLE = "idle"
-    }
-
-    private val _imageIcon = MutableLiveData<Bitmap>()
-    val imageIcon get() = _imageIcon
-
-    private val _loading = MutableLiveData<Int>()
-    val loading: LiveData<Int> get() = _loading
-
-    private val _workingOn = MutableLiveData<String>()
-    val workingOn: LiveData<String> get() = _workingOn
-
-    private val _ready = MutableLiveData<String>()
-    val ready get() : LiveData<String> = _ready
-
-    private val _data = MutableLiveData<List<String>>()
-    val data : LiveData<List<String>> get() = _data
-
-    private val mmr = MediaMetadataRetriever()
-    private val getVideo = registry.register("vid", ActivityResultContracts.GetContent()) { uri: Uri? ->
-        mmr.setDataSource(application.applicationContext, uri)
-        _ready.value = "READY"
-    }
     private val detector = FaceDetection.getClient()
 
     private val bitmapArray = ArrayList<Bitmap>()
@@ -148,10 +123,6 @@ class MainLocalViewModel(
                     Log.d("Seles subskep", "cari Label ${stringArray.size} - $count")
                 }
             })
-    }
-
-    fun getVideo() {
-        getVideo.launch("video/*")
     }
 
     private fun Bitmap.cropFace(face: Face) : Bitmap {

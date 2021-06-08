@@ -1,8 +1,6 @@
 package spirit.bangkit.kusaku.factory
 
 import android.app.Application
-import android.content.Context
-import android.media.MediaMetadataRetriever
 import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,9 +8,9 @@ import spirit.bangkit.kusaku.data.KusakuLocalRepository
 import spirit.bangkit.kusaku.data.KusakuRemoteRepository
 import spirit.bangkit.kusaku.data.source.remote.ApiConfig
 import spirit.bangkit.kusaku.machinelearning.MlModel
-import spirit.bangkit.kusaku.ui.MainLocalViewModel
-import spirit.bangkit.kusaku.ui.MainRemoteViewModel
-import spirit.bangkit.kusaku.ui.MainViewModel
+import spirit.bangkit.kusaku.ui.main.MainLocalViewModel
+import spirit.bangkit.kusaku.ui.main.MainRemoteViewModel
+import spirit.bangkit.kusaku.ui.main.MainViewModel
 import spirit.bangkit.kusaku.utils.Injection
 
 class KusakuViewModelFactory private constructor(
@@ -49,7 +47,7 @@ class KusakuViewModelFactory private constructor(
             modelClass.isAssignableFrom(MainLocalViewModel::class.java) ->
                 return MainLocalViewModel(application, localRepository!!, registry) as T
             modelClass.isAssignableFrom(MainRemoteViewModel::class.java) ->
-                return MainRemoteViewModel(remoteRepository) as T
+                return MainRemoteViewModel(application, remoteRepository, registry) as T
             else -> throw Throwable("Unknown ViewModel class: " + modelClass.name)
         }
     }

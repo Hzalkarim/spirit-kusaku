@@ -1,4 +1,4 @@
-package spirit.bangkit.kusaku.ui
+package spirit.bangkit.kusaku.ui.result
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import spirit.bangkit.kusaku.adapter.ResultAdapter
 import spirit.bangkit.kusaku.databinding.ActivityResultBinding
+import spirit.bangkit.kusaku.ui.main.LocalModelActivity
 
 class ResultActivity : AppCompatActivity() {
 

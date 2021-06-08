@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.RemoteModelActivity"
+    tools:context=".ui.main.RemoteModelActivity"
     tools:visibility="visible">
 
     <include layout="@layout/main_base"

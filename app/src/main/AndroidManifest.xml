@@ -12,9 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Kusaku">
-        <activity android:name=".ui.RemoteModelActivity"></activity>
-        <activity android:name=".ui.ResultActivity" />
-        <activity android:name=".ui.LocalModelActivity">
+        <activity android:name=".ui.main.RemoteModelActivity"></activity>
+        <activity android:name=".ui.result.ResultActivity" />
+        <activity android:name=".ui.main.LocalModelActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
