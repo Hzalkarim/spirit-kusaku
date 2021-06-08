@@ -36,10 +36,14 @@ open class MainBaseViewModel(application: Application, registry: ActivityResultR
     val data : LiveData<List<String>> get() = _data
 
     protected val mmr = MediaMetadataRetriever()
-    protected val getVideo = registry.register("vid", ActivityResultContracts.GetContent()) { uri: Uri? ->
-        mmr.setDataSource(application.applicationContext, uri)
-        _imageIcon.value = mmr.getFrameAtTime(1000000)
-        _ready.value = "READY"
+    private val getVideo = registry.register("vid", ActivityResultContracts.GetContent()) { uri: Uri? ->
+        try {
+            mmr.setDataSource(application.applicationContext, uri)
+            _imageIcon.value = mmr.getFrameAtTime(1000000)
+            _ready.value = "READY"
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun getVideo() {

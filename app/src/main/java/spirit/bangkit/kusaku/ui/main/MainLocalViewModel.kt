@@ -87,7 +87,6 @@ class MainLocalViewModel(
                 }
                 getLabelsFromFaceImages(arr)
             }
-            count += 1
             /*if (i == videoFrame.lastIndex)
                 getLabelsFromFaceImages(bitmapArray.toMutableList())*/
         }
@@ -108,6 +107,7 @@ class MainLocalViewModel(
                     Log.d("Label Muka", t)
                     val newVal = _loading.value?.plus(1)
                     _loading.value = newVal
+                    count += 1
                 }
 
                 override fun onError(e: Throwable?) {

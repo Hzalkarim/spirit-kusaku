@@ -19,8 +19,8 @@ data class FacePost(
     val message: String = "",
 
     @field:SerializedName("result")
-    val result: FaceResult,
+    val result: FaceResult = FaceResult(),
 
     @field:SerializedName("status")
-    val status: Boolean,
+    val status: Boolean = false,
 ) : Parcelable

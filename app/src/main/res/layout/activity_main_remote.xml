@@ -7,10 +7,15 @@
     tools:context=".ui.main.RemoteModelActivity"
     tools:visibility="visible">
 
-    <include layout="@layout/main_base"
+    <include
         android:id="@+id/base_remote"
+        layout="@layout/main_base"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

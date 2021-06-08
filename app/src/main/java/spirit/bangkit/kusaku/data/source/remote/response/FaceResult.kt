@@ -26,4 +26,10 @@ data class FaceResult(
 
     @field:SerializedName("Surprise")
     val Surprise: Int = 0,
+
+    @field:SerializedName("status")
+    val status: Boolean = false,
+
+    @field:SerializedName("message")
+    val message: String = ""
 ) : Parcelable

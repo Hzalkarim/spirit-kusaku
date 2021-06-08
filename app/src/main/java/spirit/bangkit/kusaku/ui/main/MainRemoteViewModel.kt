@@ -3,6 +3,7 @@ package spirit.bangkit.kusaku.ui.main
 import android.app.Application
 import android.graphics.Bitmap
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
@@ -28,6 +29,7 @@ class MainRemoteViewModel(
     companion object {
         const val ENCODING_FRAME = "encoding_frame"
         const val WAITING_RESPONSE = "waiting_response"
+        const val SERVER_BUSY = "server_busy"
     }
 
     private val _postResponse = MutableLiveData<FacePost>()
@@ -36,7 +38,7 @@ class MainRemoteViewModel(
     private val _getResponse = MutableLiveData<FaceResult>()
     val getResponse get() = _getResponse
 
-    var token: String = ""
+    var token: String = "halo"
 
     private val bitmapArray = ArrayList<Bitmap>()
     private val stringArray = ArrayList<String>()
@@ -44,7 +46,14 @@ class MainRemoteViewModel(
     fun startProcessingVideo() { extractFrameFromVideo() }
 
     fun getResultFromRemoteModel() {
+        _workingOn.value = LABEL_FACE
         repository.getResultObservable(token)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                _getResponse.value = it
+                _workingOn.value = if (it.status) DONE else SERVER_BUSY
+            }
     }
 
     private fun extractFrameFromVideo() {
@@ -77,7 +86,6 @@ class MainRemoteViewModel(
                     e?.printStackTrace()
                 }
 
-                @RequiresApi(Build.VERSION_CODES.O)
                 override fun onComplete() {
                     encodeVideoFrameBitmaps(bitmapArray.toMutableList())
                 }
@@ -85,14 +93,15 @@ class MainRemoteViewModel(
             })
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun encodeVideoFrameBitmaps(videoFrame: List<Bitmap>) {
         stringArray.clear()
+        _loading.value = 0
         Observable.create<String> {
             try {
                 for (frame in videoFrame) {
                     it.onNext(bitmapToBase64(frame))
                 }
+                it.onComplete()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -105,6 +114,8 @@ class MainRemoteViewModel(
 
                 override fun onNext(t: String?) {
                     stringArray.add(t!!)
+                    val newVal = _loading.value?.plus(1)
+                    _loading.value = newVal
                 }
 
                 override fun onError(e: Throwable?) {
@@ -127,8 +138,9 @@ class MainRemoteViewModel(
                 }
 
                 override fun onNext(t: FacePost?) {
-                    if (t != null)
+                    if (t != null){
                         _postResponse.value = t
+                    }
                 }
 
                 override fun onError(e: Throwable?) {
@@ -136,17 +148,16 @@ class MainRemoteViewModel(
                 }
 
                 override fun onComplete() {
-                    _workingOn.value = DONE
+                    getResultFromRemoteModel()
                 }
 
             })
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun bitmapToBase64(bitmap: Bitmap) : String? {
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
         val byteArray = baos.toByteArray()
-        return Base64.getEncoder().encodeToString(byteArray)
+        return android.util.Base64.encodeToString(byteArray, android.util.Base64.DEFAULT)
     }
 }

@@ -27,6 +27,8 @@ class RemoteModelActivity : AppCompatActivity(), View.OnClickListener {
         binding = ActivityMainRemoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.baseRemote.progressBar.visibility = View.INVISIBLE
+
         setUpModel()
 
         binding.baseRemote.btnStart.setOnClickListener(this)
@@ -44,22 +46,40 @@ class RemoteModelActivity : AppCompatActivity(), View.OnClickListener {
                     binding.baseRemote.tvStatusWorking.text = getString(R.string.working_frame)
                 }
                 MainRemoteViewModel.ENCODING_FRAME -> {
-                    binding.baseRemote.tvStatusWorking.text = getString(R.string.working_detect)
+                    binding.baseRemote.tvStatusWorking.text = getString(R.string.working_encoding)
                 }
                 MainRemoteViewModel.WAITING_RESPONSE -> {
-                    binding.baseRemote.tvStatusWorking.text = getString(R.string.working_label)
+                    binding.baseRemote.tvStatusWorking.text = getString(R.string.working_wait)
                 }
                 MainBaseViewModel.IDLE -> {
                     binding.baseRemote.progressBar.visibility = View.INVISIBLE
                 }
                 MainBaseViewModel.DONE -> {
                     binding.baseRemote.btnResult.isEnabled = true
+                    binding.baseRemote.progressBar.visibility = View.INVISIBLE
+                    binding.baseRemote.tvStatusWorking.text = getString(R.string.working_wait_done)
+                }
+                MainRemoteViewModel.SERVER_BUSY -> {
+                    binding.baseRemote.progressBar.visibility = View.INVISIBLE
+                    binding.baseRemote.btnStart.isEnabled = true
+                    val msg = model.getResponse.value?.message
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 }
             }
+            binding.baseRemote.btnStart.text =
+                if (it == MainRemoteViewModel.SERVER_BUSY) "GET DATA" else "START"
         }
 
         model.ready.observe(this) {
             binding.baseRemote.btnStart.isEnabled = it == "READY"
+        }
+
+        model.loading.observe(this) {
+            when (model.workingOn.value) {
+                MainBaseViewModel.EXTRACT_FRAME -> {
+                    binding.baseRemote.tvStatusNum.text = getString(R.string.count_frame, it)
+                }
+            }
         }
 
         model.imageIcon.observe(this, { img ->
@@ -69,7 +89,6 @@ class RemoteModelActivity : AppCompatActivity(), View.OnClickListener {
         })
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onClick(v: View?) {
 
         when (v?.id) {
@@ -80,15 +99,18 @@ class RemoteModelActivity : AppCompatActivity(), View.OnClickListener {
                 binding.baseRemote.btnResult.isEnabled = false
             }
             R.id.btn_start -> {
-                model.startProcessingVideo()
-                v.isEnabled = false
-                binding.baseRemote.progressBar.visibility = View.VISIBLE
+                if (model.workingOn.value == MainRemoteViewModel.SERVER_BUSY) {
+                    model.getResultFromRemoteModel()
+                } else {
+                    model.startProcessingVideo()
+                    v.isEnabled = false
+                    binding.baseRemote.progressBar.visibility = View.VISIBLE
+                }
             }
             R.id.btn_result -> {
                 val intent = Intent(this, ResultActivity::class.java)
-                val list = model.data.value
+                val faceResult = model.getResponse.value
                 try {
-                    val faceResult = ConverterHelper.stringListToFaceResult(list!!)
                     intent.putExtra(ResultActivity.EXTRA_RESULT, faceResult)
                     startActivity(intent)
                 } catch (e: Exception) {

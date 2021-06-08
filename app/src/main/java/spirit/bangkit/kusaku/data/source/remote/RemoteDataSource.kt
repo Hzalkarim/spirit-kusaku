@@ -1,5 +1,7 @@
 package spirit.bangkit.kusaku.data.source.remote
 
+import spirit.bangkit.kusaku.data.source.remote.response.FacePost
+
 class RemoteDataSource(private val apiService: FaceDetectorService) {
 
     companion object {
@@ -13,7 +15,7 @@ class RemoteDataSource(private val apiService: FaceDetectorService) {
     }
 
     fun postImagesObservable(token: String, faceImagesStream: List<String>) =
-        apiService.postImage(token, faceImagesStream)
+        apiService.postImage(FacePost(token, faceImagesStream))
 
     fun getResultsObservable(token: String) = apiService.getResult(token)
 }

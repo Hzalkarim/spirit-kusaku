@@ -8,10 +8,7 @@ import spirit.bangkit.kusaku.data.source.remote.response.FaceResult
 interface FaceDetectorService {
 
     @POST("predict")
-    fun postImage(
-        @Field("token") token: String,
-        @Field("images") images: List<String>
-    ) : Observable<FacePost>
+    fun postImage(@Body body: FacePost) : Observable<FacePost>
 
     @GET("result")
     fun getResult(

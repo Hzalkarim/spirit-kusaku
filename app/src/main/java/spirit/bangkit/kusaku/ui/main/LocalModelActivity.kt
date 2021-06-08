@@ -83,6 +83,7 @@ class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 MainBaseViewModel.DONE -> {
                     binding.baseLocal.btnResult.isEnabled = true
+                    binding.baseLocal.progressBar.visibility = View.INVISIBLE
                 }
             }
         }
@@ -98,7 +99,6 @@ class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
         })
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onClick(v: View?) {
 
         when (v?.id) {
