@@ -8,4 +8,7 @@
 
     <string name="count_frame">%1$d frame(s)</string>
     <string name="count_label">%1$d label(s)</string>
+    <string name="pick_your_model_source">Pick Your Model Source</string>
+    <string name="local">Local</string>
+    <string name="remote">Remote</string>
 </resources>
