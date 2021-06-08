@@ -1,13 +1,21 @@
 package spirit.bangkit.kusaku.ui.main
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import spirit.bangkit.kusaku.R
 import spirit.bangkit.kusaku.databinding.ActivityMainBinding
 import spirit.bangkit.kusaku.factory.KusakuViewModelFactory
+import spirit.bangkit.kusaku.ui.main.base.MainBaseViewModel
+import spirit.bangkit.kusaku.ui.result.ResultActivity
+import spirit.bangkit.kusaku.util.ConverterHelper
+import java.lang.Exception
 
 class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -35,10 +43,12 @@ class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
         with (binding.baseLocal) {
             btnStart.isEnabled = false
             progressBar.visibility = View.INVISIBLE
-            groupMetadata.visibility = View.GONE
+
+            btnResult.isEnabled = false
 
             btnVideo.setOnClickListener(this@LocalModelActivity)
             btnStart.setOnClickListener(this@LocalModelActivity)
+            btnResult.setOnClickListener(this@LocalModelActivity)
         }
     }
 
@@ -47,19 +57,32 @@ class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
         model = ViewModelProvider(this, factory)[MainLocalViewModel::class.java]
 
         model.loading.observe(this) {
-            binding.baseLocal.tvStatusNum.text = it.toString()
+            when (model.workingOn.value) {
+                MainBaseViewModel.EXTRACT_FRAME -> {
+                    binding.baseLocal.tvStatusNum.text = getString(R.string.count_frame, it)
+                }
+                MainBaseViewModel.LABEL_FACE -> {
+                    binding.baseLocal.tvStatusNum.text = getString(R.string.count_label, it)
+                }
+            }
         }
 
         model.workingOn.observe(this) {
             when (it) {
-                MainLocalViewModel.EXTRACT_FRAME -> {
+                MainBaseViewModel.EXTRACT_FRAME -> {
                     binding.baseLocal.tvStatusWorking.text = getString(R.string.working_frame)
                 }
-                MainLocalViewModel.DETECT_LABEL_FACE -> {
+                MainBaseViewModel.DETECT_FACE -> {
+                    binding.baseLocal.tvStatusWorking.text = getString(R.string.working_detect)
+                }
+                MainBaseViewModel.LABEL_FACE -> {
                     binding.baseLocal.tvStatusWorking.text = getString(R.string.working_label)
                 }
-                MainLocalViewModel.IDLE -> {
-                    binding.baseLocal.groupMetadata.visibility = View.GONE
+                MainBaseViewModel.IDLE -> {
+                    binding.baseLocal.progressBar.visibility = View.INVISIBLE
+                }
+                MainBaseViewModel.DONE -> {
+                    binding.baseLocal.btnResult.isEnabled = true
                 }
             }
         }
@@ -75,76 +98,33 @@ class LocalModelActivity : AppCompatActivity(), View.OnClickListener {
         })
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onClick(v: View?) {
 
         when (v?.id) {
             R.id.btn_video -> {
                 model.getVideo()
+                binding.baseLocal.tvStatusNum.text = ""
+                binding.baseLocal.tvStatusWorking.text = ""
+                binding.baseLocal.btnResult.isEnabled = false
             }
             R.id.btn_start -> {
                 model.startProcessingVideo()
                 v.isEnabled = false
-                binding.baseLocal.groupMetadata.visibility = View.VISIBLE
-            }
-            /*
-            R.id.btn_select_video -> {
-                model.getVideo()
-                model.clearFaces()
-            }
-            R.id.btn_extract -> {
-                model.extractImageAndDetectFace()
-                binding.progressBar.visibility = View.VISIBLE
-                binding.btnExtract.isEnabled = false
+                binding.baseLocal.progressBar.visibility = View.VISIBLE
             }
             R.id.btn_result -> {
                 val intent = Intent(this, ResultActivity::class.java)
-                val mapResult = model.data.value?.groupingBy { it }?.eachCount()
-                for (pair in mapResult!!) {
-                    intent.putExtra(pair.key, pair.value)
-                }
-                startActivity(intent)
-            }*/
-        }
-    }
-
-    /*private fun setupViewModel() {
-        model = ViewModelProvider(
-            this,
-            KusakuViewModelFactory.getInstance(application, activityResultRegistry, mmr)
-        ).get(MainViewModel::class.java)
-
-        model.data.observe(this, { arr ->
-            val map = arr.groupingBy { it }.eachCount()
-            Log.d("Hasil", map.toString())
-            binding.progressBar.visibility = View.INVISIBLE
-        })
-
-        model.ready.observe(this, { s ->
-            when (s) {
-                MainViewModel.READY_EXTRACT -> {
-                    binding.btnVideo.alpha = .3f
-                    binding.tvMetadata.text = "READY"
-                    binding.tvMetadata.visibility = View.VISIBLE
-                }
-                MainViewModel.READY_RESULT -> {
-                    binding.btnVideo.alpha = .3f
-                    binding.tvMetadata.visibility = View.GONE
-
-
-                }
-                MainViewModel.FAILED -> {
-                    binding.btnVideo.alpha = 1f
-                    binding.tvMetadata.visibility = View.GONE
-
+                val list = model.data.value
+                try {
+                    val faceResult = ConverterHelper.stringListToFaceResult(list!!)
+                    intent.putExtra(ResultActivity.EXTRA_RESULT, faceResult)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
                 }
             }
-        })
-
-        model.imageIcon.observe(this, { img ->
-            Glide.with(this)
-                .load(img)
-                .into(binding.imgVideo)
-        })
-    }*/
+        }
+    }
 
 }

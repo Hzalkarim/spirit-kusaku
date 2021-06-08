@@ -2,20 +2,18 @@ package spirit.bangkit.kusaku.ui.main
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.os.Build
-import android.util.Log
 import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import spirit.bangkit.kusaku.data.KusakuRemoteRepository
+import spirit.bangkit.kusaku.data.source.remote.response.FacePost
+import spirit.bangkit.kusaku.data.source.remote.response.FaceResult
 import spirit.bangkit.kusaku.ui.main.base.MainBaseViewModel
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
@@ -27,7 +25,27 @@ class MainRemoteViewModel(
     private val repository: KusakuRemoteRepository,
     registry: ActivityResultRegistry) : MainBaseViewModel(application, registry) {
 
+    companion object {
+        const val ENCODING_FRAME = "encoding_frame"
+        const val WAITING_RESPONSE = "waiting_response"
+    }
+
+    private val _postResponse = MutableLiveData<FacePost>()
+    val postResponse get() = _postResponse
+
+    private val _getResponse = MutableLiveData<FaceResult>()
+    val getResponse get() = _getResponse
+
+    var token: String = ""
+
     private val bitmapArray = ArrayList<Bitmap>()
+    private val stringArray = ArrayList<String>()
+
+    fun startProcessingVideo() { extractFrameFromVideo() }
+
+    fun getResultFromRemoteModel() {
+        repository.getResultObservable(token)
+    }
 
     private fun extractFrameFromVideo() {
         bitmapArray.clear()
@@ -59,13 +77,70 @@ class MainRemoteViewModel(
                     e?.printStackTrace()
                 }
 
+                @RequiresApi(Build.VERSION_CODES.O)
                 override fun onComplete() {
-                    
+                    encodeVideoFrameBitmaps(bitmapArray.toMutableList())
                 }
 
             })
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun encodeVideoFrameBitmaps(videoFrame: List<Bitmap>) {
+        stringArray.clear()
+        Observable.create<String> {
+            try {
+                for (frame in videoFrame) {
+                    it.onNext(bitmapToBase64(frame))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe( object : Observer<String> {
+                override fun onSubscribe(d: Disposable?) {
+                    _workingOn.value = ENCODING_FRAME
+                }
+
+                override fun onNext(t: String?) {
+                    stringArray.add(t!!)
+                }
+
+                override fun onError(e: Throwable?) {
+                    e?.printStackTrace()
+                }
+
+                override fun onComplete() {
+                    postImageToRemoteModel(stringArray.toList())
+                }
+            })
+    }
+
+    private fun postImageToRemoteModel(listString: List<String>) {
+        repository.postImagesObservable(token, listString)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe( object : Observer<FacePost> {
+                override fun onSubscribe(d: Disposable?) {
+                    _workingOn.value = WAITING_RESPONSE
+                }
+
+                override fun onNext(t: FacePost?) {
+                    if (t != null)
+                        _postResponse.value = t
+                }
+
+                override fun onError(e: Throwable?) {
+                    e?.printStackTrace()
+                }
+
+                override fun onComplete() {
+                    _workingOn.value = DONE
+                }
+
+            })
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun bitmapToBase64(bitmap: Bitmap) : String? {

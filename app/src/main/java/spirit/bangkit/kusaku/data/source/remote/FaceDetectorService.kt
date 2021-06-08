@@ -3,7 +3,7 @@ package spirit.bangkit.kusaku.data.source.remote
 import io.reactivex.rxjava3.core.Observable
 import retrofit2.http.*
 import spirit.bangkit.kusaku.data.source.remote.response.FacePost
-import spirit.bangkit.kusaku.data.source.remote.response.Result
+import spirit.bangkit.kusaku.data.source.remote.response.FaceResult
 
 interface FaceDetectorService {
 
@@ -16,5 +16,5 @@ interface FaceDetectorService {
     @GET("result")
     fun getResult(
         @Query("token") token: String
-    ) : Observable<Result>
+    ) : Observable<FaceResult>
 }

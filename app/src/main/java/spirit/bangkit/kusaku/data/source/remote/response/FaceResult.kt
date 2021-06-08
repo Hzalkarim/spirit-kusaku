@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Result(
+data class FaceResult(
     @field:SerializedName("Angry")
     val Angry: Int = 0,
 

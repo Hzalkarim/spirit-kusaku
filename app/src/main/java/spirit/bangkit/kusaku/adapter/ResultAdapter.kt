@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import spirit.bangkit.kusaku.databinding.ItemListviewBinding
 
-class ResultAdapter(private val list: Map<String?, Int>) : RecyclerView.Adapter<ResultAdapter.ResultViewHolder>() {
+class ResultAdapter(private val list: Map<String, Int>) : RecyclerView.Adapter<ResultAdapter.ResultViewHolder>() {
 
     inner class ResultViewHolder(val binding: ItemListviewBinding) : RecyclerView.ViewHolder(binding.root)
 

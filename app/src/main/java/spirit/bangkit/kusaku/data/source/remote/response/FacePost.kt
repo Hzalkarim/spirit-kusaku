@@ -19,7 +19,7 @@ data class FacePost(
     val message: String = "",
 
     @field:SerializedName("result")
-    val result: Result,
+    val result: FaceResult,
 
     @field:SerializedName("status")
     val status: Boolean,

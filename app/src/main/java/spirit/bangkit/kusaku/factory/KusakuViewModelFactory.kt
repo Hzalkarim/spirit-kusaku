@@ -11,7 +11,7 @@ import spirit.bangkit.kusaku.machinelearning.MlModel
 import spirit.bangkit.kusaku.ui.main.MainLocalViewModel
 import spirit.bangkit.kusaku.ui.main.MainRemoteViewModel
 import spirit.bangkit.kusaku.ui.main.MainViewModel
-import spirit.bangkit.kusaku.utils.Injection
+import spirit.bangkit.kusaku.di.Injection
 
 class KusakuViewModelFactory private constructor(
     private val application: Application,

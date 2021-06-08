@@ -1,4 +1,4 @@
-package spirit.bangkit.kusaku.utils
+package spirit.bangkit.kusaku.di
 
 import android.content.Context
 import spirit.bangkit.kusaku.data.KusakuLocalRepository

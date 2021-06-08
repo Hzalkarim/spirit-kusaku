@@ -2,11 +2,8 @@ package spirit.bangkit.kusaku.ui.main
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.util.Log
 import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.*
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
@@ -63,10 +60,11 @@ class MainLocalViewModel(
 
                 override fun onError(e: Throwable?) {
                     e?.printStackTrace()
+                    _workingOn.value = IDLE
                 }
 
                 override fun onComplete() {
-                    getFacesFromVideoImages(bitmapArray.toMutableList())
+                    getFacesFromVideoImages(bitmapArray.toList())
                     Log.d("Selesai", "cari frem")
                 }
 
@@ -79,14 +77,13 @@ class MainLocalViewModel(
         count = 0
         maxLoad = videoFrame.size
         _loading.value = 0
+        _workingOn.value = DETECT_FACE
         for (i in videoFrame.indices) {
             val inputImage = InputImage.fromBitmap(videoFrame[i], 0)
             detector.process(inputImage).addOnSuccessListener {
                 val arr = ArrayList<Bitmap>()
                 for (face in it){
                     arr.add(videoFrame[i].cropFace(face))
-                    val newVal = _loading.value?.plus(1)
-                    _loading.value = newVal
                 }
                 getLabelsFromFaceImages(arr)
             }
@@ -102,23 +99,27 @@ class MainLocalViewModel(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe( object : Observer<String> {
                 override fun onSubscribe(d: Disposable?) {
-                    _workingOn.value = DETECT_LABEL_FACE
+                    _workingOn.value = LABEL_FACE
                     Log.d("Mulai subskep", "cari Label ${faces.size}")
                 }
 
                 override fun onNext(t: String?) {
                     stringArray.add(t!!)
                     Log.d("Label Muka", t)
+                    val newVal = _loading.value?.plus(1)
+                    _loading.value = newVal
                 }
 
                 override fun onError(e: Throwable?) {
                     e?.printStackTrace()
+                    _workingOn.value = IDLE
+
                 }
 
                 override fun onComplete() {
                     _data.value = stringArray
                     if (workingOn.value != IDLE && count == maxLoad)
-                        _workingOn.value = IDLE
+                        _workingOn.value = DONE
                     Log.d("Hasil", stringArray.toString())
                     Log.d("Seles subskep", "cari Label ${stringArray.size} - $count")
                 }

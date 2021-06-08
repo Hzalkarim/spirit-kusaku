@@ -14,8 +14,10 @@ open class MainBaseViewModel(application: Application, registry: ActivityResultR
 
     companion object {
         const val EXTRACT_FRAME = "extract_frame"
-        const val DETECT_LABEL_FACE = "detect_label_face"
+        const val DETECT_FACE = "detect_face"
+        const val LABEL_FACE = "label_face"
         const val IDLE = "idle"
+        const val DONE = "done"
     }
 
     protected val _imageIcon = MutableLiveData<Bitmap>()
@@ -36,6 +38,7 @@ open class MainBaseViewModel(application: Application, registry: ActivityResultR
     protected val mmr = MediaMetadataRetriever()
     protected val getVideo = registry.register("vid", ActivityResultContracts.GetContent()) { uri: Uri? ->
         mmr.setDataSource(application.applicationContext, uri)
+        _imageIcon.value = mmr.getFrameAtTime(1000000)
         _ready.value = "READY"
     }
 
