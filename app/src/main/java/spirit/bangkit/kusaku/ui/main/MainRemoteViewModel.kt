@@ -2,10 +2,8 @@ package spirit.bangkit.kusaku.ui.main
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.os.Build
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.result.ActivityResultRegistry
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -18,7 +16,6 @@ import spirit.bangkit.kusaku.data.source.remote.response.FaceResult
 import spirit.bangkit.kusaku.ui.main.base.MainBaseViewModel
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
-import java.util.*
 import kotlin.collections.ArrayList
 
 class MainRemoteViewModel(
@@ -45,10 +42,16 @@ class MainRemoteViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        clear()
+        clearMmr()
     }
 
-    fun startProcessingVideo() { extractFrameFromVideo() }
+    fun startProcessingVideo() {
+        try {
+            extractFrameFromVideo()
+        } catch (e: Exception) {
+            _workingOn.value = ERROR
+        }
+    }
 
     fun getResultFromRemoteModel() {
         _workingOn.value = LABEL_FACE
@@ -99,6 +102,7 @@ class MainRemoteViewModel(
     }
 
     private fun encodeVideoFrameBitmaps(videoFrame: List<Bitmap>) {
+        releaseMmr()
         stringArray.clear()
         _loading.value = 0
         Observable.create<String> {
