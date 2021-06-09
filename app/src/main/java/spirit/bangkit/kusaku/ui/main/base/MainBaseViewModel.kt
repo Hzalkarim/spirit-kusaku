@@ -18,6 +18,7 @@ open class MainBaseViewModel(application: Application, registry: ActivityResultR
         const val LABEL_FACE = "label_face"
         const val IDLE = "idle"
         const val DONE = "done"
+        const val ERROR = "error"
     }
 
     protected val _imageIcon = MutableLiveData<Bitmap>()
@@ -50,7 +51,11 @@ open class MainBaseViewModel(application: Application, registry: ActivityResultR
         getVideo.launch("video/*")
     }
 
-    fun clear() {
+    protected fun releaseMmr() {
+        mmr.release()
+    }
+
+    protected fun clearMmr() {
         mmr.close()
     }
 }

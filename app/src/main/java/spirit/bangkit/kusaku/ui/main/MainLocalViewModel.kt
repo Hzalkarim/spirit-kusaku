@@ -29,7 +29,13 @@ class MainLocalViewModel(
     private var count = 0
     private var maxLoad = 0
 
-    fun startProcessingVideo() { extractFrameFromVideo() }
+    fun startProcessingVideo() {
+        try {
+            extractFrameFromVideo()
+        } catch (e: Exception) {
+            _workingOn.value = ERROR
+        }
+    }
 
     private fun extractFrameFromVideo() {
         bitmapArray.clear()
@@ -139,7 +145,7 @@ class MainLocalViewModel(
         super.onCleared()
         detector.close()
         repository.onClear()
-        clear()
+        clearMmr()
     }
 
 }
